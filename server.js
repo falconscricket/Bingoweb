@@ -1,26 +1,41 @@
-// Couple Bingo - Backend Server
+// Couple Bingo - Backend Server with Telegram Bot
 // Run: npm install && npm start
 // Opens on http://localhost:3000
 
 const express = require('express');
 const path = require('path');
+const { Telegraf } = require('telegraf');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const TURN_SECONDS = 15;
+const BOT_TOKEN = process.env.BOT_TOKEN;
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// ---------- Telegram Bot Setup ----------
+if (BOT_TOKEN) {
+  const bot = new Telegraf(BOT_TOKEN);
+
+  // /start command
+  bot.start((ctx) => {
+    ctx.reply('Welcome to Couple Bingo Bot! Your server and bot are up and running.');
+  });
+
+  // Example text handler
+  bot.on('text', (ctx) => {
+    ctx.reply(`Ungaluku anuppiya msg: ${ctx.message.text}`);
+  });
+
+  // Telegram Webhook Route
+  app.post(`/webhook/${BOT_TOKEN}`, (req, res) => {
+    bot.handleUpdate(req.body, res);
+    res.sendStatus(200);
+  });
+}
+
 // ---------- In-memory room store ----------
-// rooms[code] = {
-//   code, players: [{id,name}], status: 'waiting'|'arranging'|'playing'|'finished',
-//   calledNumbers: [], turn: 'p1'|'p2'|null, turnStartedAt: number|null,
-//   winner: 'p1'|'p2'|null, ready: [], boards: { p1: [...25 nums 1-25], p2: [...25 nums 1-25] },
-//   progress: { p1: number, p2: number } - how many of the 5 TAZZU letters/lines each player has matched,
-//   winLines: [[[r,c]x5], ...] | null - all completed lines for the winner, for final highlight,
-//   createdAt: number
-// }
 const rooms = {};
 
 function genCode() {
@@ -35,9 +50,6 @@ function otherId(id) {
   return id === 'p1' ? 'p2' : 'p1';
 }
 
-// All 12 possible bingo lines (5 rows + 5 cols + 2 diagonals), as fixed
-// [r,c] coordinate sets. These coordinates are the same for every player -
-// only the numbers sitting in each cell differ per board.
 const LINES = (() => {
   const lines = [];
   for (let r = 0; r < 5; r++) lines.push([[r,0],[r,1],[r,2],[r,3],[r,4]]);
@@ -47,12 +59,6 @@ const LINES = (() => {
   return lines;
 })();
 
-// TAZZU rule: a single row/column/diagonal match is only "one match" (one
-// letter of T-A-Z-Z-U). A player needs 5 separate line matches (any mix of
-// rows/cols/diagonals) before the overall game is won - re-matching cells
-// that already belong to an already-counted line doesn't count again since
-// we always recompute from the full set of currently-complete lines.
-// Returns every currently-complete line (array of lines, each a [r,c] list).
 function getCompletedLines(board, calledNumbers) {
   if (!board) return [];
   const marked = new Set(calledNumbers);
@@ -61,7 +67,6 @@ function getCompletedLines(board, calledNumbers) {
   return LINES.filter(line => line.every(([r, c]) => M(r, c)));
 }
 
-// Strip data the requesting player shouldn't see (opponent's board layout)
 function publicRoom(room, requestingPlayerId) {
   const { boards, ...rest } = room;
   return {
@@ -80,8 +85,6 @@ setInterval(cleanupOldRooms, 1000 * 60 * 30);
 
 // ---------- Routes ----------
 
-// Create a new room, or join an existing one by code
-// body: { name, code? }
 app.post('/api/rooms', (req, res) => {
   const { name, code } = req.body;
   if (!name || !name.trim()) {
@@ -121,8 +124,6 @@ app.post('/api/rooms', (req, res) => {
   return res.json({ code, playerId: 'p2', room: publicRoom(room, 'p2') });
 });
 
-// Get current room state (poll this)
-// query: ?playerId=p1
 app.get('/api/rooms/:code', (req, res) => {
   const room = rooms[req.params.code];
   if (!room) return res.status(404).json({ error: 'Room not found' });
@@ -130,8 +131,6 @@ app.get('/api/rooms/:code', (req, res) => {
   res.json({ room: publicRoom(room, playerId) });
 });
 
-// Save a player's board arrangement (private - opponent never receives this via GET)
-// body: { playerId, board: [25 numbers, 1-25] }
 app.post('/api/rooms/:code/board', (req, res) => {
   const room = rooms[req.params.code];
   if (!room) return res.status(404).json({ error: 'Room not found' });
@@ -143,8 +142,6 @@ app.post('/api/rooms/:code/board', (req, res) => {
   res.json({ ok: true });
 });
 
-// Mark a player ready; when both players are ready, game starts
-// body: { playerId }
 app.post('/api/rooms/:code/ready', (req, res) => {
   const room = rooms[req.params.code];
   if (!room) return res.status(404).json({ error: 'Room not found' });
@@ -163,8 +160,6 @@ app.post('/api/rooms/:code/ready', (req, res) => {
   res.json({ room: publicRoom(room, playerId) });
 });
 
-// Call a number - server validates turn & checks win using BOTH real boards (cheat-proof)
-// body: { playerId, number }
 app.post('/api/rooms/:code/call', (req, res) => {
   const room = rooms[req.params.code];
   if (!room) return res.status(404).json({ error: 'Room not found' });
@@ -176,21 +171,16 @@ app.post('/api/rooms/:code/call', (req, res) => {
 
   room.calledNumbers.push(number);
 
-  // Recompute from scratch every call - calledNumbers only ever grows, so
-  // this naturally stays consistent (a line that completed earlier stays
-  // completed, it never gets double-counted because we count DISTINCT lines,
-  // not calls).
   const p1Lines = getCompletedLines(room.boards.p1, room.calledNumbers);
   const p2Lines = getCompletedLines(room.boards.p2, room.calledNumbers);
   room.progress = { p1: p1Lines.length, p2: p2Lines.length };
 
-  const TARGET_MATCHES = 5; // T-A-Z-Z-U
+  const TARGET_MATCHES = 5; 
   const p1Done = p1Lines.length >= TARGET_MATCHES;
   const p2Done = p2Lines.length >= TARGET_MATCHES;
 
   if (p1Done || p2Done) {
     room.status = 'finished';
-    // whoever hit 5 matches on this very call wins; if somehow both, caller wins
     room.winner = p1Done && p2Done ? playerId : (p1Done ? 'p1' : 'p2');
     room.winLines = room.winner === 'p1' ? p1Lines : p2Lines;
   } else {
@@ -201,8 +191,6 @@ app.post('/api/rooms/:code/call', (req, res) => {
   res.json({ room: publicRoom(room, playerId) });
 });
 
-// Reset room for "Play Again"
-// body: { playerId }
 app.post('/api/rooms/:code/reset', (req, res) => {
   const room = rooms[req.params.code];
   if (!room) return res.status(404).json({ error: 'Room not found' });
@@ -218,6 +206,19 @@ app.post('/api/rooms/:code/reset', (req, res) => {
   res.json({ room: publicRoom(room, req.body.playerId) });
 });
 
-app.listen(PORT, () => {
-  console.log(`Couple Bingo backend running on http://localhost:${PORT}`);
+app.listen(PORT, async () => {
+  console.log(`Couple Bingo backend & Telegram bot running on http://localhost:${PORT}`);
+
+  // Railway-lku webhook-ah auto-aga set panra code
+  if (BOT_TOKEN) {
+    try {
+      const { Telegraf } = require('telegraf');
+      const tempBot = new Telegraf(BOT_TOKEN);
+      const WEBHOOK_URL = `https://bingoweb-production-eb74.up.railway.app/webhook/${BOT_TOKEN}`;
+      await tempBot.telegram.setWebhook(WEBHOOK_URL);
+      console.log(`Telegram Webhook successfully set to: ${WEBHOOK_URL}`);
+    } catch (error) {
+      console.error('Failed to set webhook automatically:', error);
+    }
+  }
 });
