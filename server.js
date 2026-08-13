@@ -1,4 +1,4 @@
-// Couple Bingo - Backend Server with Telegram Bot
+// Couple Bingo - Backend Server with Telegram Bot & Mini App
 // Run: npm install && npm start
 // Opens on http://localhost:3000
 
@@ -18,9 +18,20 @@ app.use(express.static(path.join(__dirname, 'public')));
 if (BOT_TOKEN) {
   const bot = new Telegraf(BOT_TOKEN);
 
-  // /start command
+  // /start command with Web App Button
   bot.start((ctx) => {
-    ctx.reply('Welcome to Couple Bingo Bot! Your server and bot are up and running.');
+    ctx.reply('Welcome to Couple Bingo! Click below to play the game inside Telegram:', {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            { 
+              text: '🎮 Play Couple Bingo', 
+              web_app: { url: 'https://bingoweb-production-eb74.up.railway.app' } 
+            }
+          ]
+        ]
+      }
+    });
   });
 
   // Example text handler
@@ -209,7 +220,7 @@ app.post('/api/rooms/:code/reset', (req, res) => {
 app.listen(PORT, async () => {
   console.log(`Couple Bingo backend & Telegram bot running on http://localhost:${PORT}`);
 
-  // Railway-lku webhook-ah auto-aga set panra code
+  // Auto set Telegram Webhook for Railway
   if (BOT_TOKEN) {
     try {
       const { Telegraf } = require('telegraf');
