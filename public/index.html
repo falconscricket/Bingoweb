@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Couple's Bingo</title>
+<title>Tazzu Bingo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -354,8 +354,11 @@ function genBoard(){
 function gridNumberAt(idx){ return myBoardNums[idx]; }
 function otherId(id){ return id==='p1' ? 'p2' : 'p1'; }
 
-function lettersRowHtml(struckCol){
-  return LETTERS.map((l,i)=>`<span class="${struckCol===i?'struck':''}">${l}<span class="lstrike"></span></span>`).join('');
+// struckCount = how many of T-A-Z-Z-U are matched so far (0-5). Letters
+// strike in order left-to-right, one per completed row/column/diagonal -
+// it does NOT matter which line completed, just how many total.
+function lettersRowHtml(struckCount){
+  return LETTERS.map((l,i)=>`<span class="${i<struckCount?'struck':''}">${l}<span class="lstrike"></span></span>`).join('');
 }
 
 function renderJoin(errorMsg){
@@ -411,7 +414,7 @@ function renderArrange(room){
     <h1>Arrange Your Board</h1>
     <div class="sub">The heart cell (5) is your special one — shuffle till it feels right</div>
     <div class="board-frame"><div class="board-inner">
-      <div class="letters-row">${lettersRowHtml(-1)}</div>
+      <div class="letters-row">${lettersRowHtml(0)}</div>
       <div class="grid" id="grid"></div>
     </div></div>
     <div class="btn-row">
@@ -463,6 +466,10 @@ function renderPlaying(room){
   const me = room.players.find(p=>p.id===myId);
   const opp = room.players.find(p=>p.id!==myId);
   const myTurn = room.turn === myId;
+  const progress = room.progress || { p1:0, p2:0 };
+  const myMatches = progress[myId] || 0;
+  const oppId = otherId(myId);
+  const oppMatches = progress[oppId] || 0;
 
   APP.innerHTML = `
     <div class="players-row">
@@ -481,9 +488,10 @@ function renderPlaying(room){
     <div class="status-bar"><span class="timer" id="timerBox">--</span></div>
     <div class="msg" id="turnMsg">${myTurn ? "Your turn — tap a number on your board" : (opp?opp.name:'Partner')+"'s turn..."}</div>
     <div class="board-frame"><div class="board-inner">
-      <div class="letters-row">${lettersRowHtml(-1)}</div>
+      <div class="letters-row">${lettersRowHtml(myMatches)}</div>
       <div class="grid" id="grid"></div>
     </div></div>
+    <div class="msg" style="margin-top:8px;">You: ${myMatches}/5 matched &middot; ${opp?opp.name:'Partner'}: ${oppMatches}/5 matched</div>
     <div class="called-log">Called: ${room.calledNumbers.length ? room.calledNumbers.join(', ') : 'none yet'}</div>
   `;
   drawGrid(room.calledNumbers, {
@@ -518,13 +526,12 @@ async function autoCall(){
   const remaining = [];
   const res = await fetch(`${API}/rooms/${roomCode}?playerId=${myId}`);
   const { room } = await res.json();
-  
   for(let i=1;i<=25;i++) if(!room.calledNumbers.includes(i)) remaining.push(i);
   if(remaining.length===0) return;
   const pick = remaining[Math.floor(Math.random()*remaining.length)];
   await callNumber(pick);
 }
- 
+
 function confettiHtml(){
   const dur = () => (2 + Math.random()*1.4);
   let html = '';
@@ -535,34 +542,35 @@ function confettiHtml(){
   }
   return html;
 }
- 
-// Given the winner's own board and a winLine ([r,c] pairs), figure out which
-// grid indices to highlight, and if it's a straight column, which letter to cross.
-function analyzeWinLine(winLine){
-  if(!winLine) return { winCells: new Set(), struckCol: -1 };
-  const winCells = new Set(winLine.map(([r,c]) => r*5 + c));
-  const cols = winLine.map(([r,c]) => c);
-  const isColumn = cols.every(c => c === cols[0]);
-  return { winCells, struckCol: isColumn ? cols[0] : -1 };
+
+// Given the winner's own board and winLines (array of [r,c]-pair lines),
+// figure out every grid index to highlight across all matched lines.
+function analyzeWinLines(winLines){
+  const winCells = new Set();
+  (winLines || []).forEach(line => {
+    line.forEach(([r,c]) => winCells.add(r*5 + c));
+  });
+  return { winCells };
 }
- 
+
 function renderFinished(room){
   if(timerInterval) clearInterval(timerInterval);
   const winner = room.players.find(p=>p.id===room.winner);
   const iWon = room.winner === myId;
   const title = iWon ? 'You Won!' : (winner ? winner.name + ' Won!' : 'Game Over');
-  const sub = iWon ? 'Five in a row — well played' : "Five in a row for your partner — this round's theirs";
-  const { winCells, struckCol } = analyzeWinLine(room.winLine);
- 
+  const sub = iWon ? 'TAZZU complete — 5 matches, well played' : "Your partner matched all 5 — this round's theirs";
+  const { winCells } = analyzeWinLines(room.winLines);
+  const matchCount = Math.min((room.progress && room.progress[room.winner]) || 5, 5);
+
   APP.innerHTML = `
     <div class="winner-wrap">
       <div class="confetti">${confettiHtml()}</div>
       <div class="winner-badge">${heartIcon()}</div>
-      <div class="winner-eyebrow">Five in a row</div>
+      <div class="winner-eyebrow">Tazzu — 5 matches</div>
       <div class="winner-banner">${title}</div>
       <div class="winner-sub">${sub}</div>
       <div class="board-frame"><div class="board-inner">
-        <div class="letters-row">${lettersRowHtml(struckCol)}</div>
+        <div class="letters-row">${lettersRowHtml(matchCount)}</div>
         <div class="grid" id="grid"></div>
       </div></div>
       <button class="btn-main" id="againBtn" style="margin-top:18px;">Play Again</button>
@@ -575,7 +583,7 @@ function renderFinished(room){
     await api(`/rooms/${roomCode}/board`, 'POST', { playerId: myId, board: myBoardNums });
   };
 }
- 
+
 function startPoll(){
   stopPoll();
   pollHandle = setInterval(tick, 1200);
@@ -594,7 +602,7 @@ async function tick(){
     room = data.room;
     if(room.myBoard) myBoardNums = room.myBoard;
   } catch(e){ return; }
- 
+
   if(room.status === 'waiting'){
     if(room.players.length >= 2) renderArrange(room);
     else renderWaiting(room);
@@ -606,7 +614,7 @@ async function tick(){
     renderFinished(room);
   }
 }
- 
+
 renderJoin();
 </script>
 </body>
