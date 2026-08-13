@@ -3,30 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Couple Bingo</title>
+<title>Couple's Bingo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --ink:#3b2a2f;
-    --rose:#b3455a;
-    --rose-deep:#8f2f43;
-    --rose-soft:#f7e9ec;
-    --gold:#c9974a;
-    --gold-soft:#f3e6cd;
-    --cream:#fffaf4;
-    --line:#e7d8c9;
-    --shadow: 0 24px 60px rgba(80,30,45,.16);
+    --ink:#3b2233;
+    --rose:#e0466f;
+    --rose-deep:#a2274d;
+    --rose-soft:#fbe8ef;
+    --gold:#d9a24b;
+    --gold-soft:#f6ecd6;
+    --cream:#fffaf7;
+    --line:#f0d9e2;
+    --frame-1:#c98a9c;
+    --frame-2:#8f2f52;
+    --shadow: 0 24px 60px rgba(120,20,60,.20);
   }
   * { box-sizing: border-box; margin:0; padding:0; }
   html,body { height:100%; }
   body {
     font-family:'Manrope', sans-serif;
     background:
-      radial-gradient(circle at 12% 8%, rgba(201,151,74,.14) 0%, transparent 40%),
-      radial-gradient(circle at 90% 90%, rgba(179,69,90,.12) 0%, transparent 42%),
-      linear-gradient(160deg, #fdf6ee 0%, #f7ece2 45%, #f3e4de 100%);
+      radial-gradient(circle at 12% 8%, rgba(224,70,111,.14) 0%, transparent 40%),
+      radial-gradient(circle at 90% 90%, rgba(217,162,75,.14) 0%, transparent 42%),
+      linear-gradient(160deg, #fdf1f4 0%, #faeaee 45%, #f6e6e9 100%);
     min-height:100vh;
     display:flex; align-items:center; justify-content:center;
     padding:20px;
@@ -37,44 +39,46 @@
 
   .hearts-bg { position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:0; }
   .hearts-bg span {
-    position:absolute; bottom:-40px; opacity:.18; color:var(--rose);
+    position:absolute; bottom:-40px; opacity:.20; color:var(--rose);
     animation: floatUp linear infinite;
     font-size:14px;
   }
   @keyframes floatUp {
     0% { transform: translateY(0) rotate(0deg); opacity:0; }
-    12% { opacity:.22; }
-    88% { opacity:.14; }
+    12% { opacity:.24; }
+    88% { opacity:.15; }
     100% { transform: translateY(-110vh) rotate(18deg); opacity:0; }
   }
 
   .card {
-    background: rgba(255,253,249,0.92);
+    background: rgba(255,253,251,0.94);
     backdrop-filter: blur(14px);
-    border-radius: 22px;
-    padding: 36px 30px;
+    border-radius: 24px;
+    padding: 30px 26px;
     max-width: 460px;
     width:100%;
-    box-shadow: var(--shadow), 0 0 0 1px rgba(201,151,74,.18) inset;
+    box-shadow: var(--shadow), 0 0 0 1px rgba(217,162,75,.18) inset;
     text-align:center;
     position:relative;
     z-index:1;
-    border:1px solid rgba(201,151,74,.25);
+    border:1px solid rgba(217,162,75,.22);
   }
 
   h1 {
     font-family:'Playfair Display', serif;
     font-weight:800;
-    font-size:30px; color:var(--rose-deep); margin-bottom:6px;
+    font-size:28px; color:var(--rose-deep); margin-bottom:4px;
     letter-spacing:.3px;
+    display:flex; align-items:center; justify-content:center; gap:8px;
   }
   h1 .accent { color: var(--gold); font-style:italic; font-weight:700; }
+  h1 svg { width:22px; height:22px; flex:none; }
   .sub {
-    font-size:13px; color:#8a6b6f; margin-bottom:24px; font-weight:600;
+    font-size:12.5px; color:#96687a; margin-bottom:18px; font-weight:600;
     letter-spacing:.2px;
   }
   .divider {
-    width:44px; height:2px; margin:14px auto 20px;
+    width:44px; height:2px; margin:12px auto 18px;
     background:linear-gradient(90deg, transparent, var(--gold), transparent);
   }
 
@@ -85,65 +89,130 @@
     font-family:'Manrope',sans-serif; font-weight:600; color:var(--ink);
     background:var(--cream); transition: border-color .15s, box-shadow .15s;
   }
-  input::placeholder{ color:#b79a95; font-weight:500; }
-  input:focus { border-color:var(--rose); box-shadow:0 0 0 4px rgba(179,69,90,.10); }
+  input::placeholder{ color:#c99cae; font-weight:500; }
+  input:focus { border-color:var(--rose); box-shadow:0 0 0 4px rgba(224,70,111,.10); }
 
   button {
-    border:none; border-radius:12px; padding:14px 18px;
-    font-size:14.5px; font-weight:700; cursor:pointer;
-    font-family:'Manrope',sans-serif; letter-spacing:.3px;
+    border:none; border-radius:12px; padding:13px 18px;
+    font-size:14px; font-weight:700; cursor:pointer;
+    font-family:'Manrope',sans-serif; letter-spacing:.4px;
     transition: transform .12s, box-shadow .12s, opacity .12s, filter .12s;
   }
-  button:hover { filter:brightness(1.04); box-shadow: 0 10px 22px rgba(143,47,67,.22); }
+  button:hover { filter:brightness(1.04); box-shadow: 0 10px 22px rgba(162,39,77,.22); }
   button:active { transform:scale(0.97); }
   .btn-main {
     background: linear-gradient(135deg, var(--rose) 0%, var(--rose-deep) 100%);
-    color:#fff8f3; width:100%; margin-top:4px;
-    box-shadow: 0 10px 24px rgba(143,47,67,.28);
-    text-transform:uppercase; font-size:13px; letter-spacing:1.2px;
+    color:#fff8f7; width:100%; margin-top:4px;
+    box-shadow: 0 10px 24px rgba(162,39,77,.28);
+    text-transform:uppercase; font-size:12.5px; letter-spacing:1.3px;
   }
   .btn-main:disabled { opacity:.5; cursor:not-allowed; box-shadow:none; }
   .btn-row { display:flex; gap:10px; margin-top:10px; }
   .btn-sec {
     flex:1; background:var(--rose-soft); color:var(--rose-deep); border:1.5px solid var(--line);
-    text-transform:uppercase; font-size:12.5px; letter-spacing:1px;
+    text-transform:uppercase; font-size:12px; letter-spacing:1px;
   }
 
   .room-code {
     font-family:'Playfair Display', serif;
-    font-size:36px; font-weight:800; letter-spacing:9px; color:var(--rose-deep);
-    background:var(--gold-soft); border-radius:14px; padding:14px 0; margin:18px 0;
+    font-size:34px; font-weight:800; letter-spacing:9px; color:var(--rose-deep);
+    background:var(--gold-soft); border-radius:14px; padding:13px 0; margin:16px 0;
     border:1.5px dashed var(--gold);
   }
-  .players { display:flex; justify-content:center; gap:14px; margin:16px 0; flex-wrap:wrap; }
-  .chip {
-    background:var(--rose-soft); border:1.5px solid var(--line); border-radius:999px;
-    padding:8px 18px; font-size:13.5px; font-weight:700; color:var(--rose-deep);
+
+  /* ---------- Player row (avatar + name + turn indicator) ---------- */
+  .players-row {
+    display:flex; align-items:center; justify-content:center; gap:22px;
+    margin: 6px 0 18px;
   }
-  .chip.me { background:linear-gradient(135deg,var(--rose),var(--rose-deep)); border-color:var(--rose-deep); color:#fff8f3; }
+  .player {
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+    opacity:.55; transition: opacity .25s;
+  }
+  .player.active { opacity:1; }
+  .avatar {
+    width:46px; height:46px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Playfair Display', serif; font-weight:700; font-size:17px;
+    color:#fff8f7; background:linear-gradient(150deg, var(--rose), var(--rose-deep));
+    box-shadow:0 6px 14px rgba(162,39,77,.25);
+    border:2px solid #fff;
+    position:relative;
+  }
+  .player.active .avatar { box-shadow:0 0 0 3px rgba(224,70,111,.22), 0 6px 14px rgba(162,39,77,.3); }
+  .avatar .turn-dot {
+    position:absolute; bottom:-3px; right:-3px; width:16px; height:16px; border-radius:50%;
+    background:var(--gold); border:2px solid #fff; display:none;
+    align-items:center; justify-content:center; font-size:9px;
+  }
+  .player.active .avatar .turn-dot { display:flex; }
+  .player-name { font-size:12px; font-weight:700; color:var(--rose-deep); max-width:80px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .turn-bar { width:28px; height:3px; border-radius:2px; background:var(--line); }
+  .player.active .turn-bar { background: linear-gradient(90deg, var(--gold), var(--rose)); }
+  .vs { font-family:'Playfair Display', serif; font-style:italic; color:var(--gold); font-size:14px; }
+
+  /* ---------- Board frame ---------- */
+  .board-frame {
+    background: linear-gradient(155deg, var(--frame-1), var(--frame-2));
+    border-radius: 20px;
+    padding: 5px;
+    margin: 6px 0 18px;
+    box-shadow: 0 14px 30px rgba(120,20,60,.22);
+  }
+  .board-inner {
+    background: linear-gradient(170deg, #fff, var(--rose-soft));
+    border-radius: 16px;
+    padding: 12px;
+  }
+  .letters-row {
+    display:grid; grid-template-columns: repeat(5,1fr); gap:8px;
+    margin-bottom:8px;
+  }
+  .letters-row span {
+    font-family:'Playfair Display', serif; font-weight:800; font-size:19px;
+    color:var(--rose-deep);
+    position:relative;
+    padding:4px 0;
+  }
+  .letters-row span .lstrike {
+    position:absolute; left:12%; top:50%; width:76%; height:2.5px;
+    background: var(--gold);
+    transform: translateY(-50%) scaleX(0);
+    transform-origin:left center;
+    transition: transform .4s ease;
+    border-radius:2px;
+  }
+  .letters-row span.struck .lstrike { transform: translateY(-50%) scaleX(1); }
 
   .grid {
-    display:grid; grid-template-columns: repeat(5,1fr); gap:8px;
-    margin:20px 0; user-select:none;
+    display:grid; grid-template-columns: repeat(5,1fr); gap:7px;
+    user-select:none;
   }
   .cell {
     position:relative;
     aspect-ratio:1/1; display:flex; align-items:center; justify-content:center;
-    background:var(--cream); border:1.5px solid var(--line); border-radius:10px;
+    background:var(--cream); border:1.5px solid var(--line); border-radius:11px;
     font-weight:700; font-size:16px; color:var(--ink); cursor:default;
     font-family:'Manrope', sans-serif;
-    transition: background .2s, border-color .2s, color .3s;
+    transition: background .2s, border-color .2s, color .3s, transform .15s;
     overflow:hidden;
   }
-  .cell .strike {
-    position:absolute; left:6%; top:50%; width:88%; height:2.5px;
-    background: var(--rose-deep);
-    transform-origin: left center;
-    transform: translateY(-50%) scaleX(0) rotate(-9deg);
-    transition: transform .32s cubic-bezier(.65,0,.35,1);
-    border-radius:2px;
+  .cell.clickable { cursor:pointer; }
+  .cell.clickable:hover { border-color:var(--rose); transform:translateY(-1px); }
+  .cell.clickable:active { transform:scale(0.94); }
+
+  /* the cross mark: two diagonal strokes that draw in like an X over the number */
+  .cell .cross { position:absolute; inset:0; pointer-events:none; }
+  .cell .cross i {
+    position:absolute; left:10%; top:50%; width:80%; height:2.5px;
+    background: var(--rose-deep); border-radius:2px;
+    transform-origin:center;
+    transition: transform .3s cubic-bezier(.65,0,.35,1);
   }
-  .cell.marked .strike { transform: translateY(-50%) scaleX(1) rotate(-9deg); }
+  .cell .cross i.d1 { transform: translateY(-50%) rotate(45deg) scaleX(0); }
+  .cell .cross i.d2 { transform: translateY(-50%) rotate(-45deg) scaleX(0); }
+  .cell.marked .cross i.d1 { transform: translateY(-50%) rotate(45deg) scaleX(1); }
+  .cell.marked .cross i.d2 { transform: translateY(-50%) rotate(-45deg) scaleX(1); }
   .cell.marked {
     color: var(--rose-deep);
     background: var(--rose-soft);
@@ -155,79 +224,72 @@
     border:1.5px solid var(--gold);
     color:var(--rose-deep);
     font-family:'Playfair Display', serif;
-    font-size:18px;
+    font-size:17px;
   }
-  .cell.heart-five::before {
-    content:"";
-    position:absolute; top:4px; right:5px; width:5px; height:5px;
-    border-radius:50%; background:var(--gold);
-  }
+  .cell.heart-five svg { position:absolute; top:3px; right:4px; width:10px; height:10px; }
   .cell.heart-five.marked {
     background: linear-gradient(155deg, var(--rose-soft), var(--gold-soft));
   }
-  .cell.heart-five .strike { background: var(--gold); }
+  .cell.heart-five .cross i { background: var(--gold); }
+
+  .cell.win-cell {
+    animation: winPulse 1s ease-in-out infinite;
+  }
+  @keyframes winPulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(224,70,111,.5); }
+    50% { box-shadow: 0 0 0 6px rgba(224,70,111,0); }
+  }
 
   .status-bar {
-    display:flex; justify-content:space-between; align-items:center;
-    margin-bottom:12px; font-size:13.5px; font-weight:700; color:var(--rose-deep);
+    display:flex; justify-content:center; align-items:center;
+    margin-bottom:10px;
   }
   .timer {
     background:var(--rose-soft); border:1.5px solid var(--line); border-radius:999px;
-    padding:6px 16px; font-size:14px; font-weight:800; color:var(--rose-deep);
+    padding:6px 18px; font-size:14px; font-weight:800; color:var(--rose-deep);
     font-family:'Playfair Display', serif;
   }
-  .timer.low { color:#fff8f3; background:linear-gradient(135deg,var(--rose),var(--rose-deep)); }
-  .callpad {
-    display:grid; grid-template-columns: repeat(5,1fr); gap:6px; margin:18px 0;
-  }
-  .callbtn {
-    background:#fff; border:1.5px solid var(--line); border-radius:9px;
-    padding:9px 0; font-size:13.5px; font-weight:700; color:var(--ink);
-    position:relative; font-family:'Manrope',sans-serif;
-  }
-  .callbtn.is-five { border-color:var(--gold); color:var(--rose-deep); background:var(--gold-soft); }
-  .callbtn.used { background:#f1eae4; color:#b7a89f; border-color:#e5dcd3; cursor:not-allowed; text-decoration:line-through; }
-  .callbtn:disabled { cursor:not-allowed; opacity:.65; }
+  .timer.low { color:#fff8f7; background:linear-gradient(135deg,var(--rose),var(--rose-deep)); }
+
   .called-log {
-    font-size:12px; color:#8a6b6f; margin-bottom:8px; min-height:16px;
+    font-size:11.5px; color:#96687a; margin:10px 0 4px; min-height:16px;
     word-break: break-word; font-weight:600; letter-spacing:.2px;
   }
   .msg { font-size:13.5px; color:var(--rose-deep); margin:10px 0; font-weight:700; }
-  .heart-loader { font-size:30px; opacity:.55; animation: pulse 1.4s ease-in-out infinite; }
+  .heart-loader { font-size:28px; opacity:.55; animation: pulse 1.4s ease-in-out infinite; color:var(--rose); }
   @keyframes pulse { 0%,100%{transform:scale(1); opacity:.5;} 50%{transform:scale(1.12); opacity:.8;} }
 
-  .winner-wrap { position:relative; padding-top:6px; }
+  .winner-wrap { position:relative; padding-top:4px; }
   .winner-badge {
-    width:64px; height:64px; margin:0 auto 14px;
+    width:60px; height:60px; margin:0 auto 12px;
     border-radius:50%;
     background: linear-gradient(150deg, var(--gold), var(--rose));
     display:flex; align-items:center; justify-content:center;
-    box-shadow: 0 12px 26px rgba(143,47,67,.32);
+    box-shadow: 0 12px 26px rgba(162,39,77,.32);
     animation: badgeIn .55s cubic-bezier(.2,1.4,.4,1) both;
   }
-  .winner-badge svg { width:28px; height:28px; }
+  .winner-badge svg { width:26px; height:26px; }
   @keyframes badgeIn { from{ transform:scale(0.3) rotate(-25deg); opacity:0; } to{ transform:scale(1) rotate(0); opacity:1; } }
   .winner-eyebrow {
-    font-size:11.5px; letter-spacing:2.5px; text-transform:uppercase;
+    font-size:11px; letter-spacing:2.5px; text-transform:uppercase;
     color:var(--gold); font-weight:800; margin-bottom:6px;
   }
   .winner-banner {
     font-family:'Playfair Display', serif;
-    font-size:26px; font-weight:800; color:var(--rose-deep); margin-bottom:4px;
+    font-size:25px; font-weight:800; color:var(--rose-deep); margin-bottom:4px;
     animation: fadeUp .5s ease .05s both;
   }
-  .winner-sub { font-size:13px; color:#8a6b6f; font-weight:600; margin-bottom:18px; animation: fadeUp .5s ease .12s both; }
+  .winner-sub { font-size:12.5px; color:#96687a; font-weight:600; margin-bottom:16px; animation: fadeUp .5s ease .12s both; }
   @keyframes fadeUp { from{ opacity:0; transform:translateY(8px);} to{ opacity:1; transform:translateY(0);} }
 
-  .confetti { position:absolute; inset:0; pointer-events:none; overflow:hidden; border-radius:22px; }
+  .confetti { position:absolute; inset:0; pointer-events:none; overflow:hidden; border-radius:22px; z-index:2; }
   .confetti span {
-    position:absolute; top:-10px; width:6px; height:10px; opacity:.85;
+    position:absolute; top:-10px; font-size:12px;
     animation: confettiFall 2.6s ease-in forwards;
-    border-radius:1px;
   }
   @keyframes confettiFall {
     0% { transform: translateY(-20px) rotate(0deg); opacity:1; }
-    100% { transform: translateY(320px) rotate(280deg); opacity:0; }
+    100% { transform: translateY(340px) rotate(280deg); opacity:0; }
   }
 
   .error { color:#a13b3b; font-size:12.5px; margin-top:8px; font-weight:700; }
@@ -235,11 +297,12 @@
 </head>
 <body>
 <div class="hearts-bg" id="heartsBg"></div>
-<div class="card" id="app"><div class="heart-loader">♥</div></div>
+<div class="card" id="app"><div class="heart-loader">&#10084;</div></div>
 
 <script>
 const API = '/api';
 const APP = document.getElementById('app');
+const LETTERS = ['T','A','Z','Z','U'];
 let myName = '';
 let myId = '';
 let roomCode = '';
@@ -249,12 +312,15 @@ let myBoardNums = [];
 let localAutoCallDone = false;
 const TURN_SECONDS = 15;
 
+function heartIcon(){
+  return '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.6-10-9.3C.6 8.1 2.6 4.5 6 4.1c2-.2 3.6.8 6 3 2.4-2.2 4-3.2 6-3 3.4.4 5.4 4 3 7.6C19.5 16.4 12 21 12 21z"/></svg>';
+}
+
 (function initHeartsBg(){
   const bg = document.getElementById('heartsBg');
-  const symbols = ['♥','♡'];
   for(let i=0;i<10;i++){
     const s = document.createElement('span');
-    s.textContent = symbols[Math.floor(Math.random()*symbols.length)];
+    s.textContent = '\u2764';
     s.style.left = Math.random()*100 + 'vw';
     s.style.fontSize = (10 + Math.random()*14) + 'px';
     s.style.animationDuration = (14 + Math.random()*14) + 's';
@@ -288,10 +354,14 @@ function genBoard(){
 function gridNumberAt(idx){ return myBoardNums[idx]; }
 function otherId(id){ return id==='p1' ? 'p2' : 'p1'; }
 
+function lettersRowHtml(struckCol){
+  return LETTERS.map((l,i)=>`<span class="${struckCol===i?'struck':''}">${l}<span class="lstrike"></span></span>`).join('');
+}
+
 function renderJoin(errorMsg){
   stopPoll();
   APP.innerHTML = `
-    <h1>Couple <span class="accent">Bingo</span></h1>
+    <h1>${heartIcon()}Tazzu <span class="accent">Bingo</span></h1>
     <div class="sub">A sweet little 5×5 bingo, just for the two of you</div>
     <div class="divider"></div>
     <input id="nameInput" placeholder="Your name" maxlength="14" />
@@ -324,30 +394,37 @@ function renderWaiting(room){
     <h1>Waiting<span class="accent">...</span></h1>
     <div class="sub">Share this code with your partner</div>
     <div class="room-code">${room.code}</div>
-    <div class="players">
-      ${room.players.map(p=>`<div class="chip ${p.id===myId?'me':''}">${p.name}</div>`).join('')}
+    <div class="players-row">
+      ${room.players.map(p=>`
+        <div class="player active">
+          <div class="avatar">${p.name.charAt(0).toUpperCase()}</div>
+          <div class="player-name">${p.name}${p.id===myId?' (you)':''}</div>
+        </div>`).join('')}
     </div>
     <div class="msg">Waiting for your partner to join...</div>
-    <div class="heart-loader">♥</div>
+    <div class="heart-loader">&#10084;</div>
   `;
 }
 
 function renderArrange(room){
   APP.innerHTML = `
     <h1>Arrange Your Board</h1>
-    <div class="sub">The signature cell (5) is marked in gold — shuffle till it feels right</div>
-    <div class="grid" id="grid"></div>
+    <div class="sub">The heart cell (5) is your special one — shuffle till it feels right</div>
+    <div class="board-frame"><div class="board-inner">
+      <div class="letters-row">${lettersRowHtml(-1)}</div>
+      <div class="grid" id="grid"></div>
+    </div></div>
     <div class="btn-row">
       <button class="btn-sec" id="shuffleBtn">Shuffle</button>
       <button class="btn-main" id="readyBtn" style="flex:1">Ready</button>
     </div>
     <div class="msg" id="readyMsg">${room.ready && room.ready.includes(myId) ? 'Waiting for your partner...' : ''}</div>
   `;
-  drawGrid([]);
+  drawGrid([], { interactive:false });
   document.getElementById('shuffleBtn').onclick = async () => {
     myBoardNums = genBoard();
     await api(`/rooms/${roomCode}/board`, 'POST', { playerId: myId, board: myBoardNums });
-    drawGrid([]);
+    drawGrid([], { interactive:false });
   };
   document.getElementById('readyBtn').onclick = async () => {
     await api(`/rooms/${roomCode}/ready`, 'POST', { playerId: myId });
@@ -355,52 +432,64 @@ function renderArrange(room){
   };
 }
 
-function drawGrid(markedNums){
+// interactive: if true, unmarked cells are clickable and calling = tapping your own cell
+function drawGrid(markedNums, opts){
+  opts = opts || {};
   const grid = document.getElementById('grid');
   if(!grid) return;
   const markedSet = new Set(markedNums);
+  const winCells = opts.winCells || new Set();
   let html = '';
   for(let i=0;i<25;i++){
     const n = gridNumberAt(i);
     const marked = markedSet.has(n);
     const isFive = n === 5;
-    html += `<div class="cell ${marked?'marked':''} ${isFive?'heart-five':''}">${n}<span class="strike"></span></div>`;
+    const isWin = winCells.has(i);
+    const clickable = opts.interactive && !marked;
+    html += `<div class="cell ${marked?'marked':''} ${isFive?'heart-five':''} ${isWin?'win-cell':''} ${clickable?'clickable':''}" data-idx="${i}" data-n="${n}">
+      ${n}${isFive ? heartIcon() : ''}
+      <span class="cross"><i class="d1"></i><i class="d2"></i></span>
+    </div>`;
   }
   grid.innerHTML = html;
+  if(opts.interactive && opts.onCellClick){
+    grid.querySelectorAll('.cell.clickable').forEach(el=>{
+      el.onclick = () => opts.onCellClick(parseInt(el.dataset.n));
+    });
+  }
 }
 
 function renderPlaying(room){
   const me = room.players.find(p=>p.id===myId);
   const opp = room.players.find(p=>p.id!==myId);
   const myTurn = room.turn === myId;
-  const markedSet = new Set(room.calledNumbers);
 
   APP.innerHTML = `
-    <div class="status-bar">
-      <span>${me?me.name:''}</span>
-      <span class="timer" id="timerBox">--</span>
-      <span>${opp?opp.name:'...'}</span>
+    <div class="players-row">
+      <div class="player ${myTurn?'active':''}">
+        <div class="avatar">${me?me.name.charAt(0).toUpperCase():''}<span class="turn-dot">${heartIcon()}</span></div>
+        <div class="player-name">${me?me.name:''}</div>
+        <div class="turn-bar"></div>
+      </div>
+      <div class="vs">&amp;</div>
+      <div class="player ${!myTurn?'active':''}">
+        <div class="avatar">${opp?opp.name.charAt(0).toUpperCase():'?'}<span class="turn-dot">${heartIcon()}</span></div>
+        <div class="player-name">${opp?opp.name:'...'}</div>
+        <div class="turn-bar"></div>
+      </div>
     </div>
-    <div class="msg" id="turnMsg">${myTurn ? "Your turn — call a number" : (opp?opp.name:'Partner')+"'s turn..."}</div>
-    <div class="grid" id="grid"></div>
+    <div class="status-bar"><span class="timer" id="timerBox">--</span></div>
+    <div class="msg" id="turnMsg">${myTurn ? "Your turn — tap a number on your board" : (opp?opp.name:'Partner')+"'s turn..."}</div>
+    <div class="board-frame"><div class="board-inner">
+      <div class="letters-row">${lettersRowHtml(-1)}</div>
+      <div class="grid" id="grid"></div>
+    </div></div>
     <div class="called-log">Called: ${room.calledNumbers.length ? room.calledNumbers.join(', ') : 'none yet'}</div>
-    <div class="callpad" id="callpad"></div>
   `;
-  drawGrid(room.calledNumbers);
-
-  const pad = document.getElementById('callpad');
-  let padHtml = '';
-  for(let i=1;i<=25;i++){
-    const used = markedSet.has(i);
-    const isFive = i === 5;
-    padHtml += `<button class="callbtn ${used?'used':''} ${isFive?'is-five':''}" data-n="${i}" ${(!myTurn||used)?'disabled':''}>${i}</button>`;
-  }
-  pad.innerHTML = padHtml;
-  if(myTurn){
-    pad.querySelectorAll('.callbtn:not(.used)').forEach(btn=>{
-      btn.onclick = () => callNumber(parseInt(btn.dataset.n));
-    });
-  }
+  drawGrid(room.calledNumbers, {
+    interactive: myTurn,
+    onCellClick: (n) => callNumber(n)
+  });
 
   if(timerInterval) clearInterval(timerInterval);
   localAutoCallDone = false;
@@ -429,55 +518,64 @@ async function autoCall(){
   const remaining = [];
   const res = await fetch(`${API}/rooms/${roomCode}?playerId=${myId}`);
   const { room } = await res.json();
+  
   for(let i=1;i<=25;i++) if(!room.calledNumbers.includes(i)) remaining.push(i);
   if(remaining.length===0) return;
   const pick = remaining[Math.floor(Math.random()*remaining.length)];
   await callNumber(pick);
 }
-
+ 
 function confettiHtml(){
-  const colors = ['#c9974a','#b3455a','#e3b673','#8f2f43'];
+  const dur = () => (2 + Math.random()*1.4);
   let html = '';
-  for(let i=0;i<24;i++){
+  for(let i=0;i<20;i++){
     const left = Math.random()*100;
     const delay = Math.random()*0.6;
-    const dur = 2 + Math.random()*1.4;
-    const color = colors[Math.floor(Math.random()*colors.length)];
-    html += `<span style="left:${left}%; background:${color}; animation-delay:${delay}s; animation-duration:${dur}s;"></span>`;
+    html += `<span style="left:${left}%; animation-delay:${delay}s; animation-duration:${dur()}s; color:${Math.random()>0.5?'var(--rose)':'var(--gold)'};">&#10084;</span>`;
   }
   return html;
 }
-
+ 
+// Given the winner's own board and a winLine ([r,c] pairs), figure out which
+// grid indices to highlight, and if it's a straight column, which letter to cross.
+function analyzeWinLine(winLine){
+  if(!winLine) return { winCells: new Set(), struckCol: -1 };
+  const winCells = new Set(winLine.map(([r,c]) => r*5 + c));
+  const cols = winLine.map(([r,c]) => c);
+  const isColumn = cols.every(c => c === cols[0]);
+  return { winCells, struckCol: isColumn ? cols[0] : -1 };
+}
+ 
 function renderFinished(room){
   if(timerInterval) clearInterval(timerInterval);
   const winner = room.players.find(p=>p.id===room.winner);
   const iWon = room.winner === myId;
   const title = iWon ? 'You Won!' : (winner ? winner.name + ' Won!' : 'Game Over');
   const sub = iWon ? 'Five in a row — well played' : "Five in a row for your partner — this round's theirs";
-
+  const { winCells, struckCol } = analyzeWinLine(room.winLine);
+ 
   APP.innerHTML = `
     <div class="winner-wrap">
       <div class="confetti">${confettiHtml()}</div>
-      <div class="winner-badge">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 21s-7.5-4.6-10-9.3C.6 8.1 2.6 4.5 6 4.1c2-.2 3.6.8 6 3 2.4-2.2 4-3.2 6-3 3.4.4 5.4 4 3 7.6C19.5 16.4 12 21 12 21z" stroke="#fff8f3" stroke-width="1.4" fill="#fff8f3" fill-opacity="0.15"/>
-        </svg>
-      </div>
+      <div class="winner-badge">${heartIcon()}</div>
       <div class="winner-eyebrow">Five in a row</div>
       <div class="winner-banner">${title}</div>
       <div class="winner-sub">${sub}</div>
-      <div class="grid" id="grid"></div>
+      <div class="board-frame"><div class="board-inner">
+        <div class="letters-row">${lettersRowHtml(struckCol)}</div>
+        <div class="grid" id="grid"></div>
+      </div></div>
       <button class="btn-main" id="againBtn" style="margin-top:18px;">Play Again</button>
     </div>
   `;
-  drawGrid(room.calledNumbers);
+  drawGrid(room.calledNumbers, { interactive:false, winCells });
   document.getElementById('againBtn').onclick = async () => {
     await api(`/rooms/${roomCode}/reset`, 'POST', { playerId: myId });
     myBoardNums = genBoard();
     await api(`/rooms/${roomCode}/board`, 'POST', { playerId: myId, board: myBoardNums });
   };
 }
-
+ 
 function startPoll(){
   stopPoll();
   pollHandle = setInterval(tick, 1200);
@@ -496,7 +594,7 @@ async function tick(){
     room = data.room;
     if(room.myBoard) myBoardNums = room.myBoard;
   } catch(e){ return; }
-
+ 
   if(room.status === 'waiting'){
     if(room.players.length >= 2) renderArrange(room);
     else renderWaiting(room);
@@ -508,7 +606,7 @@ async function tick(){
     renderFinished(room);
   }
 }
-
+ 
 renderJoin();
 </script>
 </body>
