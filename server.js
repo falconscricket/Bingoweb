@@ -17,6 +17,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 //   code, players: [{id,name}], status: 'waiting'|'arranging'|'playing'|'finished',
 //   calledNumbers: [], turn: 'p1'|'p2'|null, turnStartedAt: number|null,
 //   winner: 'p1'|'p2'|null, ready: [], boards: { p1: [...25 nums 1-25], p2: [...25 nums 1-25] },
+//   progress: { p1: number, p2: number } - how many of the 5 TAZZU letters/lines each player has matched,
+//   winLines: [[[r,c]x5], ...] | null - all completed lines for the winner, for final highlight,
 //   createdAt: number
 // }
 const rooms = {};
@@ -33,26 +35,30 @@ function otherId(id) {
   return id === 'p1' ? 'p2' : 'p1';
 }
 
-// Returns win line (array of [r,c]) or null, using a player's own board + called numbers
-// Board is a plain 25-number grid (1-25, no free space) - number 5 is only
-// styled specially on the frontend, it still has to be called like any other.
-function checkWinForBoard(board, calledNumbers) {
-  if (!board) return null;
-  const marked = new Set(calledNumbers);
-  const gAt = (idx) => board[idx];
-  const M = (r, c) => {
-    const idx = r * 5 + c;
-    return marked.has(gAt(idx));
-  };
+// All 12 possible bingo lines (5 rows + 5 cols + 2 diagonals), as fixed
+// [r,c] coordinate sets. These coordinates are the same for every player -
+// only the numbers sitting in each cell differ per board.
+const LINES = (() => {
   const lines = [];
   for (let r = 0; r < 5; r++) lines.push([[r,0],[r,1],[r,2],[r,3],[r,4]]);
   for (let c = 0; c < 5; c++) lines.push([[0,c],[1,c],[2,c],[3,c],[4,c]]);
   lines.push([[0,0],[1,1],[2,2],[3,3],[4,4]]);
   lines.push([[0,4],[1,3],[2,2],[3,1],[4,0]]);
-  for (const line of lines) {
-    if (line.every(([r, c]) => M(r, c))) return line;
-  }
-  return null;
+  return lines;
+})();
+
+// TAZZU rule: a single row/column/diagonal match is only "one match" (one
+// letter of T-A-Z-Z-U). A player needs 5 separate line matches (any mix of
+// rows/cols/diagonals) before the overall game is won - re-matching cells
+// that already belong to an already-counted line doesn't count again since
+// we always recompute from the full set of currently-complete lines.
+// Returns every currently-complete line (array of lines, each a [r,c] list).
+function getCompletedLines(board, calledNumbers) {
+  if (!board) return [];
+  const marked = new Set(calledNumbers);
+  const gAt = (idx) => board[idx];
+  const M = (r, c) => marked.has(gAt(r * 5 + c));
+  return LINES.filter(line => line.every(([r, c]) => M(r, c)));
 }
 
 // Strip data the requesting player shouldn't see (opponent's board layout)
@@ -93,6 +99,8 @@ app.post('/api/rooms', (req, res) => {
       turn: null,
       turnStartedAt: null,
       winner: null,
+      winLines: null,
+      progress: { p1: 0, p2: 0 },
       ready: [],
       boards: {},
       createdAt: Date.now(),
@@ -149,6 +157,8 @@ app.post('/api/rooms/:code/ready', (req, res) => {
     room.turnStartedAt = Date.now();
     room.calledNumbers = [];
     room.winner = null;
+    room.winLines = null;
+    room.progress = { p1: 0, p2: 0 };
   }
   res.json({ room: publicRoom(room, playerId) });
 });
@@ -166,13 +176,23 @@ app.post('/api/rooms/:code/call', (req, res) => {
 
   room.calledNumbers.push(number);
 
-  const p1Win = checkWinForBoard(room.boards.p1, room.calledNumbers);
-  const p2Win = checkWinForBoard(room.boards.p2, room.calledNumbers);
+  // Recompute from scratch every call - calledNumbers only ever grows, so
+  // this naturally stays consistent (a line that completed earlier stays
+  // completed, it never gets double-counted because we count DISTINCT lines,
+  // not calls).
+  const p1Lines = getCompletedLines(room.boards.p1, room.calledNumbers);
+  const p2Lines = getCompletedLines(room.boards.p2, room.calledNumbers);
+  room.progress = { p1: p1Lines.length, p2: p2Lines.length };
 
-  if (p1Win || p2Win) {
+  const TARGET_MATCHES = 5; // T-A-Z-Z-U
+  const p1Done = p1Lines.length >= TARGET_MATCHES;
+  const p2Done = p2Lines.length >= TARGET_MATCHES;
+
+  if (p1Done || p2Done) {
     room.status = 'finished';
-    // whoever's line completed on this very call wins; if somehow both, caller wins
-    room.winner = p1Win && p2Win ? playerId : (p1Win ? 'p1' : 'p2');
+    // whoever hit 5 matches on this very call wins; if somehow both, caller wins
+    room.winner = p1Done && p2Done ? playerId : (p1Done ? 'p1' : 'p2');
+    room.winLines = room.winner === 'p1' ? p1Lines : p2Lines;
   } else {
     room.turn = otherId(playerId);
     room.turnStartedAt = Date.now();
@@ -191,6 +211,8 @@ app.post('/api/rooms/:code/reset', (req, res) => {
   room.turn = null;
   room.turnStartedAt = null;
   room.winner = null;
+  room.winLines = null;
+  room.progress = { p1: 0, p2: 0 };
   room.ready = [];
   room.boards = {};
   res.json({ room: publicRoom(room, req.body.playerId) });
